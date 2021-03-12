@@ -13,7 +13,7 @@ let selectedChars = new Set()
 			.reduce((a, b) => a.concat(b), [])
 	)].sort()
 
-	function updateChars() {
+	function updateAnimals() {
 		document.querySelector('.chars-list').childNodes.forEach(e => {
 			e.classList.toggle('selected', selectedChars.has(e.textContent))
 		})
@@ -22,31 +22,36 @@ let selectedChars = new Set()
 			const div = document.createElement('div')
 			div.addEventListener('click', () => {
 				selectedChars.delete(c)
-				updateChars()
 				updateAnimals()
 			})
 			div.textContent = c
 			document.querySelector('.selected-chars-list').append(div)
 		})
-	}
 
-	function updateAnimals() {
+		document.querySelector('.animals-list').scrollTo({ top: 0, behavior: 'smooth' })
 		document.querySelector('.animals-list').innerHTML = ''
-		animals.map(a => {
+		const results = animals.map(a => {
 				const matches = a.characteristics.filter(e => selectedChars.has(e))
 				const score = matches.length / a.characteristics.length
 				return { ...a, matches, score }
 			})
+		const maxScore = Math.max(...results.map(a => a.score))
+		results
+			.filter(a => a.score > 0 || maxScore === 0)
 			.sort((a, b) => b.score - a.score)
 			.forEach(a => {
+				const color = lerpColor([210, 40, 20], [190, 170, 20], [120, 220, 70], a.score / maxScore)
 				document.querySelector('.animals-list').insertAdjacentHTML('beforeend', `
 					<div class="animal">
+						${maxScore > 0 ? `<div class="animal-score" style="color: ${color}">${(a.score * 100).toFixed()}</div>` : ''}
 						<h2>${a.name}</h2>
-						<h3>${a.synonyms.join(', ')}</h3>
+						${a.synonyms ? `<h3>${a.synonyms.join(', ')}</h3>` : ''}
+						<h4>${a.characteristics.join(' · ')}</h4>
 						<p>${a.description}</p>
 					</div>
 				`)
 			})
+		document.querySelector('.animals-list').insertAdjacentHTML('beforeend', `<div class="space">`)
 	}
 	updateAnimals()
 
@@ -58,7 +63,6 @@ let selectedChars = new Set()
 			} else {
 				selectedChars.add(c)
 			}
-			updateChars()
 			updateAnimals()
 		})
 		div.textContent = c
@@ -77,3 +81,13 @@ let selectedChars = new Set()
 		})
 	})
 })()
+
+function lerpColor(a, b, c, d) {
+	let res = [0, 0, 0]
+	for (let i = 0; i < 3; i += 1) {
+		res[i] = d < 0.5
+		  ? Math.round(a[i] + (b[i] - a[i]) * d)
+			: Math.round(b[i] + (c[i] - b[i]) * (d - 0.5))
+	}
+	return `rgb(${res[0]}, ${res[1]}, ${res[2]})`
+}
