@@ -86,6 +86,14 @@ let selectedChars = new Set()
 			e.classList.toggle('hidden', !results.includes(e.textContent))
 		})
 	})
+
+	document.querySelector('.mobile-toggle').addEventListener('click', () => {
+		if (document.body.getAttribute('data-panel') === 'chars') {
+			document.body.setAttribute('data-panel', 'animals')
+		} else {
+			document.body.setAttribute('data-panel', 'chars')
+		}
+	})
 })()
 
 function lerpColor(a, b, c, d) {

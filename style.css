@@ -221,3 +221,44 @@ main {
 		grid-template-columns: 1fr;
 	}
 }
+
+.mobile-toggle {
+	display: none;
+}
+
+@media screen and (max-width: 560px) {
+	.mobile-toggle {
+		margin-left: 0.5rem;
+		display: block;
+		fill: var(--white-1);
+		transition: transform 0.2s;
+	}
+
+	.mobile-toggle svg {
+		width: 32px;
+		height: 32px;
+	}
+
+	.chars-filter,
+	.selected-list,
+	.chars-list,
+	.side-pane,
+	.animals-list {
+		width: 100%;
+	}
+
+	body[data-panel="chars"] .animals-list {
+		display: none;
+	}
+	body[data-panel="animals"] .side-pane {
+		display: none;
+	}
+
+	body[data-panel="animals"] .chars-filter {
+		visibility: hidden;
+	}
+
+	body[data-panel="animals"] .mobile-toggle {
+		transform: rotate(180deg);
+	}
+}
