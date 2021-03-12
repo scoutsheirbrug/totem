@@ -1,0 +1,105 @@
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	height: 100vh;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	background-color: #1f1f1f;
+	color: #cecece;
+}
+
+header {
+	width: 100%;
+	height: 50px;
+	padding: 0.6rem 1rem;
+	z-index: 100;
+	position: absolute;
+	background-color: #1f1f1f;
+	box-shadow: 0 0 12px 0 #000;
+	display: flex;
+}
+
+.chars-filter {
+	flex: 1;
+	min-width: 275px;
+	height: 100%;
+	padding: 0 0.5em;
+	margin: 0 0.5rem;
+	font-size: 1.3rem;
+	border: none;
+	border-radius: 5px;
+	color: #cecece;
+	background-color: #292929;
+}
+
+.selected-chars-list {
+	flex: 2.5;
+	margin: 0 0.5rem;
+	display: flex;
+	align-items: center;
+}
+
+.selected-chars-list > div {
+	margin: 0 0.3rem;
+	cursor: pointer;
+	padding: 0.3rem 0.5rem;
+	border-radius: 5px;
+	background-color: #cfa22783;
+	user-select: none;
+}
+
+main {
+	display: flex;
+	padding-top: 50px;
+	height: 100%;
+}
+
+.chars-list {
+	flex: 1;
+	min-width: 300px;
+	background-color: #303030;
+	padding: 1rem 1.5rem;
+	overflow-y: scroll;
+}
+
+.chars-list > div {
+	font-size: 1.5rem;
+	cursor: pointer;
+	padding: 0.2rem 0.5rem;
+	margin: 0.3rem;
+	border-radius: 5px;
+	user-select: none;
+}
+
+.chars-list > div:hover {
+	background-color: #20202083;
+}
+
+.chars-list > div.selected {
+	background-color: #cfa22783;
+}
+.chars-list > div.selected:hover {
+	background-color: #a57d1083;
+}
+
+.chars-list > div.hidden {
+	display: none;
+}
+
+.animals-list {
+	flex: 2.5;
+	padding: 1rem 1.5rem;
+	overflow-y: scroll;
+	color: #cecece;
+}
+
+.animal {
+	margin: 1rem 0.5rem;
+}
+
+.animal h3 {
+	color: #949494;
+}
