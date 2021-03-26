@@ -14,25 +14,25 @@ let spreadsheet = null
 			.reduce((a, b) => a.concat(b), [])
 	)].sort()
 
-	Split([document.querySelector('.chars-list'), document.querySelector('.selected-list')], { direction: 'vertical', snapOffset: 0, gutterSize: 20 })
+	Split([document.querySelector('.top-panel'), document.querySelector('.bottom-panel')], { direction: 'vertical', snapOffset: 0, gutterSize: 20 })
 
 	function updateAnimals() {
-		document.querySelector('.chars-list').childNodes.forEach(e => {
+		[...document.querySelector('.chars-list').children].forEach(e => {
 			e.classList.toggle('selected', selectedChars.has(e.textContent))
 		})
 		const removeIcon = document.createElement('div')
 		removeIcon.classList.add('remove')
 		removeIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path></svg>'
-		document.querySelector('.selected-list').innerHTML = ''
+		document.querySelector('.selected-chars').innerHTML = ''
 		;[...selectedChars].sort().forEach(char => {
 			const div = document.createElement('div')
-			div.classList.add('selected-char')
+			div.classList.add('char')
 			const head = document.createElement('div')
 			head.classList.add('char-head')
 			const text = document.createElement('span')
 			text.textContent = char
 			head.append(text)
-			const remove = removeIcon.cloneNode()
+			const remove = removeIcon.cloneNode(true)
 			remove.addEventListener('click', () => {
 				selectedChars.delete(char)
 				updateAnimals()
@@ -42,7 +42,7 @@ let spreadsheet = null
 				if (div.classList.contains('expand')) {
 					div.classList.remove('expand')
 				} else {
-					document.querySelector('.selected-list').querySelectorAll('.expand')
+					document.querySelector('.selected-chars').querySelectorAll('.expand')
 						.forEach(e => e.classList.remove('expand'))
 					div.classList.add('expand')
 				}
@@ -51,7 +51,7 @@ let spreadsheet = null
 			const body = document.createElement('div')
 			body.classList.add('char-body')
 			div.append(body)
-			document.querySelector('.selected-list').append(div)
+			document.querySelector('.selected-chars').append(div)
 		})
 
 		document.querySelector('.animals-list').scrollTo({ top: 0, behavior: 'smooth' })
@@ -83,6 +83,7 @@ let spreadsheet = null
 
 	chars.forEach(c => {
 		const div = document.createElement('div')
+		div.classList.add('char')
 		div.addEventListener('click', () => {
 			if (selectedChars.has(c)) {
 				selectedChars.delete(c)
@@ -92,7 +93,7 @@ let spreadsheet = null
 			updateAnimals()
 		})
 		div.textContent = c
-		document.querySelector('.chars-list').append(div)
+		document.querySelector('.available-chars').append(div)
 	})
 
 	function normalize(str) {
@@ -102,7 +103,7 @@ let spreadsheet = null
 	const charsFilter = document.querySelector('.chars-filter')
 	charsFilter.addEventListener('keyup', () => {
 		const results = chars.filter(e => normalize(e).includes(normalize(charsFilter.value)))
-		document.querySelector('.chars-list').childNodes.forEach(e => {
+		document.querySelector('.available-chars').childNodes.forEach(e => {
 			e.classList.toggle('hidden', !results.includes(e.textContent))
 		})
 	})
@@ -137,10 +138,10 @@ let spreadsheet = null
 			 modalButton.addEventListener('click', () => {
 				modal.querySelectorAll('input.modal-error')
 					.forEach(e => e.classList.remove('modal-error'))
-					apiKey = modalApiKey.value
-					clientId = modalClientId.value
-					spreadsheetId = modalSpreadsheetId.value
-					loadSpreadsheet()
+				apiKey = modalApiKey.value
+				clientId = modalClientId.value
+				spreadsheetId = modalSpreadsheetId.value
+				loadSpreadsheet()
 			})
 		})
 	}
@@ -153,7 +154,7 @@ let spreadsheet = null
 		})
 		.then(() => {
 			return gapi.client.request({
-				path: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}`
+				path: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?includeGridData=true`
 			})
 		})
 		.then((response) => {
