@@ -14,24 +14,43 @@ let spreadsheet = null
 			.reduce((a, b) => a.concat(b), [])
 	)].sort()
 
+	Split([document.querySelector('.chars-list'), document.querySelector('.selected-list')], { direction: 'vertical', snapOffset: 0, gutterSize: 20 })
+
 	function updateAnimals() {
 		document.querySelector('.chars-list').childNodes.forEach(e => {
 			e.classList.toggle('selected', selectedChars.has(e.textContent))
 		})
+		const removeIcon = document.createElement('div')
+		removeIcon.classList.add('remove')
+		removeIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path></svg>'
 		document.querySelector('.selected-list').innerHTML = ''
-		;[...selectedChars].sort().forEach(c => {
+		;[...selectedChars].sort().forEach(char => {
 			const div = document.createElement('div')
+			div.classList.add('selected-char')
+			const head = document.createElement('div')
+			head.classList.add('char-head')
 			const text = document.createElement('span')
-			text.textContent = c
-			const remove = document.createElement('div')
-			remove.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path></svg>'
-			remove.classList.add('remove')
+			text.textContent = char
+			head.append(text)
+			const remove = removeIcon.cloneNode()
 			remove.addEventListener('click', () => {
-				selectedChars.delete(c)
+				selectedChars.delete(char)
 				updateAnimals()
 			})
-			div.append(remove)
-			div.append(text)
+			head.append(remove)
+			head.addEventListener('click', () => {
+				if (div.classList.contains('expand')) {
+					div.classList.remove('expand')
+				} else {
+					document.querySelector('.selected-list').querySelectorAll('.expand')
+						.forEach(e => e.classList.remove('expand'))
+					div.classList.add('expand')
+				}
+			})
+			div.append(head)
+			const body = document.createElement('div')
+			body.classList.add('char-body')
+			div.append(body)
 			document.querySelector('.selected-list').append(div)
 		})
 

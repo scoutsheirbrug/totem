@@ -70,6 +70,10 @@ main {
 	background-color: var(--dark-3);
 }
 
+.side-pane .gutter {
+	cursor: row-resize;
+}
+
 /* Characteristics list */
 
 .chars-list {
@@ -86,23 +90,16 @@ main {
 	padding: 0.2rem 0.5rem;
 	margin: 0.3rem;
 	border-radius: 5px;
-	/*user-select: none;*/
+	user-select: none;
 }
 
 .chars-list > div:hover {
 	background-color: #20202083;
 }
 
+.chars-list > div.selected,
 .chars-list > div.hidden {
 	display: none;
-}
-
-.chars-list > div.selected {
-	background-color: var(--accent);
-}
-
-.chars-list > div.selected:hover {
-	background-color: var(--accent-hover);
 }
 
 /* Selected list */
@@ -114,32 +111,64 @@ main {
 	overflow-y: scroll;
 }
 
-.selected-list > div {
+.selected-char {
+	border-radius: 5px;
+}
+
+.selected-char .char-head {
 	font-size: 18px;
-	white-space: nowrap;
-	margin: 0.3rem;
+	cursor: pointer;
 	padding: 0.2rem 0.5rem;
+	margin: 0.3rem;
+	border-radius: 5px;
+	user-select: none;
+	display: flex;
+	justify-content: space-between;
+}
+
+.selected-char .char-body {
+	display: none;
+}
+
+.selected-char span {
+	pointer-events: none;
+	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
 
-.selected-list span {
-	pointer-events: none;
-}
-
-.selected-list .remove {
-	float: right;
-	fill: var(--white-2);
+.selected-char .remove {
 	cursor: pointer;
+	fill: transparent;
 }
 
-.selected-list .remove:hover {
+.selected-char:hover {
+	background-color: #20202083;
+}
+
+.selected-char:hover .remove,
+.selected-char:focus .remove {
+	fill: var(--white-2);
+}
+
+.selected-char:hover .remove:hover,
+.selected-char:focus .remove:hover {
 	fill: var(--remove);
 }
 
-.selected-list .remove svg {
-	width: 24px;
-	height: 24px;
+.selected-char .remove,
+.selected-char .remove svg {
+	width: 25px;
+	height: 25px;
+}
+
+.selected-char.expand .char-body {
+	display: block;
+}
+
+.selected-char .char-body {
+	padding: 0.5rem;
+	padding-left: 1.5rem;
 }
 
 /* Animal list */
@@ -229,7 +258,7 @@ main {
 	user-select: none;
 }
 
-.modal.visible ~ .bg {
+.modal.visible ~ .overlay {
 	top: 0;
 	left: 0;
 	width: 100%;
