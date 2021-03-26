@@ -2,6 +2,7 @@
 let chars = []
 let animals = []
 let selectedChars = new Set()
+let spreadsheet = null
 
 ;(async function() {
 	const res = await fetch('./data.json')
@@ -94,6 +95,72 @@ let selectedChars = new Set()
 			document.body.setAttribute('data-panel', 'chars')
 		}
 	})
+
+	let apiKey = localStorage.getItem('totem_api_key')
+	let clientId = localStorage.getItem('totem_client_id')
+	let spreadsheetId = localStorage.getItem('totem_spreadsheet_id')
+	const modal = document.querySelector('.modal')
+	const modalApiKey = modal.querySelector('.modal-api-key')
+	const modalClientId = modal.querySelector('.modal-client-id')
+	const modalSpreadsheetId = modal.querySelector('.modal-spreadsheet-id')
+	const modalButton = modal.querySelector('button')
+	if (apiKey && clientId && spreadsheetId) {
+		gapi.load('client', () => {
+			loadSpreadsheet()
+		})
+	} else {
+		showModal()
+	}
+
+	function showModal() {
+		modal.classList.add('visible')
+		gapi.load('client', () => {
+			 modalButton.addEventListener('click', () => {
+				modal.querySelectorAll('input.modal-error')
+					.forEach(e => e.classList.remove('modal-error'))
+					apiKey = modalApiKey.value
+					clientId = modalClientId.value
+					spreadsheetId = modalSpreadsheetId.value
+					loadSpreadsheet()
+			})
+		})
+	}
+
+	function loadSpreadsheet() {
+		gapi.client.init({
+			apiKey: apiKey,
+			clientId: `${clientId}.apps.googleusercontent.com`,
+			scope: 'profile',
+		})
+		.then(() => {
+			return gapi.client.request({
+				path: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}`
+			})
+		})
+		.then((response) => {
+			modal.classList.remove('visible')
+			spreadsheet = response.result
+			console.log(spreadsheet)
+			localStorage.setItem('totem_api_key', apiKey)
+			localStorage.setItem('totem_client_id', clientId)
+			localStorage.setItem('totem_spreadsheet_id', spreadsheetId)
+		}, (reason) => {
+			modal.classList.add('visible')
+			const errorSpan = modal.querySelector('.modal-error')
+			if (reason.error === 'idpiframe_initialization_failed') {
+				modalClientId.classList.add('modal-error')
+				errorSpan.textContent = 'Ongeldige Client ID'
+			} else if (reason.result && reason.result.error && (reason.result.error.message === 'The request is missing a valid API key.' || (reason.result.error.details && reason.result.error.details[0] && reason.result.error.details[0].reason === 'API_KEY_INVALID'))) {
+				modalApiKey.classList.add('modal-error')
+				errorSpan.textContent = 'Ongeldige API Key'
+			} else if (reason.result && reason.result.error && reason.result.error.status === 'NOT_FOUND') {
+				errorSpan.textContent = 'Ongeldige Document ID'
+			} else {
+				errorSpan.textContent = 'Onbekende error'
+				console.error(reason)
+			}
+		});
+	}
 })()
 
 function lerpColor(a, b, c, d) {

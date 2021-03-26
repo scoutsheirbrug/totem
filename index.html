@@ -6,8 +6,17 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Totemzoeker (beta) | Scouts Heirbrug</title>
 	<link rel="stylesheet" href="style.css">
+	<script src="https://apis.google.com/js/api.js"></script>
 </head>
-<body data-panel="chars">
+<body data-panel="chars">	
+	<div class="modal">
+		<input class="modal-api-key" type="text" placeholder="API Key">
+		<input class="modal-client-id" type="text" placeholder="Client ID">
+		<input class="modal-spreadsheet-id" type="text" placeholder="Document ID">
+		<span class="modal-error"></span>
+		<button>GO GO GO!</button>
+	</div>
+	<div class="bg"></div>
 	<header>
 		<input class="chars-filter" type="text" placeholder="Eigenschappen zoeken">
 		<div class="mobile-toggle">
