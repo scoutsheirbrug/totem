@@ -2,6 +2,7 @@
 let chars = []
 let animals = []
 let selectedChars = new Set()
+let currentProfile = 0
 let spreadsheet = null
 
 ;(async function() {
@@ -164,6 +165,7 @@ let spreadsheet = null
 			localStorage.setItem('totem_api_key', apiKey)
 			localStorage.setItem('totem_client_id', clientId)
 			localStorage.setItem('totem_spreadsheet_id', spreadsheetId)
+			updateProfiles()
 		}, (reason) => {
 			modal.classList.add('visible')
 			const errorSpan = modal.querySelector('.modal-error')
@@ -180,6 +182,33 @@ let spreadsheet = null
 				console.error(reason)
 			}
 		});
+	}
+
+	function updateProfiles() {
+		document.querySelector('.profiles').innerHTML = ''
+		spreadsheet.sheets.forEach((sheet, i) => {
+			const div = document.createElement('div')
+			div.textContent = sheet.properties.title
+			if (i === currentProfile) {
+				div.classList.add('selected')
+			} else {
+				div.addEventListener('click', () => {
+					currentProfile = i
+					updateProfiles()
+				})
+			}
+			document.querySelector('.profiles').append(div)
+		})
+		const profile = spreadsheet.sheets[currentProfile]
+		selectedChars.clear()
+		const rows = profile.data[0].rowData || []
+		rows.forEach(row => {
+			const char = row.values[0].userEnteredValue.stringValue
+			if (chars.includes(char)) {
+				selectedChars.add(char)
+			}
+		})
+		updateAnimals()
 	}
 })()
 
