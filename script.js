@@ -1,5 +1,6 @@
 
 let chars = []
+let charsFrequency = []
 let animals = []
 let groups = []
 let selectedChars = new Set()
@@ -16,7 +17,7 @@ let spreadsheet = null
 			.map(a => a.characteristics)
 			.reduce((a, b) => a.concat(b), [])
 	)].sort()
-
+	
 	Split([document.querySelector('.top-panel'), document.querySelector('.bottom-panel')], { direction: 'vertical', snapOffset: 0, gutterSize: 20 })
 
 	function updateAnimals() {
@@ -65,7 +66,7 @@ let spreadsheet = null
 		const results = animals.map(a => {
 				const matches = a.characteristics.filter(e => selectedChars.has(e))
 				const score = matches.length / a.characteristics.length
-				return { ...a, matches, score }
+				return { ...a, matches: matches, score: score }
 			})
 		const maxScore = Math.max(...results.map(a => a.score))
 		results
@@ -87,30 +88,42 @@ let spreadsheet = null
 	}
 	updateAnimals()
 
+	charsFrequency = {}
+	chars.forEach(c => {
+		let n = 0
+		for (let animal of animals) {
+			if (animal.characteristics.includes(c)) n++
+		}
+		charsFrequency[c] = n
+	})
 	groups
-		.sort((a, b) => b.length - a.length)
+		.map(g => {
+			const score = g.reduce((a, b) => a + charsFrequency[b], 0);
+			return { group: g, score }
+		})
+		.sort((a, b) => b.score - a.score)
 		.forEach(g => {
 			const div = document.createElement('div')
 			div.classList.add('char')
 			div.addEventListener('click', () => {
-				g.forEach(c => selectedChars.add(c))
+				g.group.forEach(c => selectedChars.add(c))
 				updateAnimals()
 			})
-			div.textContent = g[0]
+			div.textContent = g.group[0]
 			document.querySelector('.available-chars').append(div)
 		})
 
-	function normalize(str) {
-		return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-	}
+	// function normalize(str) {
+	// 	return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+	// }
 
-	const charsFilter = document.querySelector('.chars-filter')
-	charsFilter.addEventListener('keyup', () => {
-		const results = chars.filter(e => normalize(e).includes(normalize(charsFilter.value)))
-		document.querySelector('.available-chars').childNodes.forEach(e => {
-			e.classList.toggle('hidden', !results.includes(e.textContent))
-		})
-	})
+	// const charsFilter = document.querySelector('.chars-filter')
+	// charsFilter.addEventListener('keyup', () => {
+	// 	const results = chars.filter(e => normalize(e).includes(normalize(charsFilter.value)))
+	// 	document.querySelector('.available-chars').childNodes.forEach(e => {
+	// 		e.classList.toggle('hidden', !results.includes(e.textContent))
+	// 	})
+	// })
 
 	document.querySelector('.mobile-toggle').addEventListener('click', () => {
 		if (document.body.getAttribute('data-panel') === 'chars') {
@@ -168,6 +181,18 @@ let spreadsheet = null
 			localStorage.setItem('totem_api_key', apiKey)
 			localStorage.setItem('totem_client_id', clientId)
 			localStorage.setItem('totem_spreadsheet_id', spreadsheetId)
+			document.querySelector('.profiles-select').innerHTML = ''
+			spreadsheet.sheets.forEach((sheet, i) => {
+				const option = document.createElement('option')
+				option.textContent = sheet.properties.title
+				option.value = i.toString()
+				document.querySelector('.profiles-select').append(option)
+			})
+			document.querySelector('.profiles-select').addEventListener('change', () => {
+				currentProfile = parseInt(document.querySelector('.profiles-select').value)
+				getProfiles()
+			})
+			document.querySelector('.profiles-select').value = '0'
 			getProfiles()
 		}, (reason) => {
 			modal.classList.add('visible')
@@ -188,20 +213,6 @@ let spreadsheet = null
 	}
 
 	function getProfiles() {
-		document.querySelector('.profiles').innerHTML = ''
-		spreadsheet.sheets.forEach((sheet, i) => {
-			const div = document.createElement('div')
-			div.textContent = sheet.properties.title
-			if (i === currentProfile) {
-				div.classList.add('selected')
-			} else {
-				div.addEventListener('click', () => {
-					currentProfile = i
-					getProfiles()
-				})
-			}
-			document.querySelector('.profiles').append(div)
-		})
 		const profile = spreadsheet.sheets[currentProfile]
 		selectedChars.clear()
 		const rows = profile.data[0].rowData || []
