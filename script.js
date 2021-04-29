@@ -1,6 +1,7 @@
 
 let chars = []
 let animals = []
+let groups = []
 let selectedChars = new Set()
 let currentProfile = 0
 let spreadsheet = null
@@ -9,6 +10,7 @@ let spreadsheet = null
 	const res = await fetch('./data.json')
 	const data = await res.json()
 	animals = data.animals
+	groups = data.groups
 	chars = [...new Set(
 		data.animals
 			.map(a => a.characteristics)
@@ -25,35 +27,38 @@ let spreadsheet = null
 		removeIcon.classList.add('remove')
 		removeIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path></svg>'
 		document.querySelector('.selected-chars').innerHTML = ''
-		;[...selectedChars].sort().forEach(char => {
-			const div = document.createElement('div')
-			div.classList.add('char')
-			const head = document.createElement('div')
-			head.classList.add('char-head')
-			const text = document.createElement('span')
-			text.textContent = char
-			head.append(text)
-			const remove = removeIcon.cloneNode(true)
-			remove.addEventListener('click', () => {
-				selectedChars.delete(char)
-				updateAnimals()
+
+		groups
+			.filter(g => g.some(c => selectedChars.has(c)))
+			.forEach(g => {
+				const div = document.createElement('div')
+				div.classList.add('char')
+				const head = document.createElement('div')
+				head.classList.add('char-head')
+				const text = document.createElement('span')
+				text.textContent = g[0]
+				head.append(text)
+				const remove = removeIcon.cloneNode(true)
+				remove.addEventListener('click', () => {
+					g.forEach(c => selectedChars.delete(c))
+					updateAnimals()
+				})
+				// head.addEventListener('click', () => {
+				// 	if (div.classList.contains('expand')) {
+				// 		div.classList.remove('expand')
+				// 	} else {
+				// 		document.querySelector('.selected-chars').querySelectorAll('.expand')
+				// 			.forEach(e => e.classList.remove('expand'))
+				// 		div.classList.add('expand')
+				// 	}
+				// })
+				head.append(remove)
+				div.append(head)
+				const body = document.createElement('div')
+				body.classList.add('char-body')
+				div.append(body)
+				document.querySelector('.selected-chars').append(div)
 			})
-			head.append(remove)
-			head.addEventListener('click', () => {
-				if (div.classList.contains('expand')) {
-					div.classList.remove('expand')
-				} else {
-					document.querySelector('.selected-chars').querySelectorAll('.expand')
-						.forEach(e => e.classList.remove('expand'))
-					div.classList.add('expand')
-				}
-			})
-			div.append(head)
-			const body = document.createElement('div')
-			body.classList.add('char-body')
-			div.append(body)
-			document.querySelector('.selected-chars').append(div)
-		})
 
 		document.querySelector('.animals-list').scrollTo({ top: 0, behavior: 'smooth' })
 		document.querySelector('.animals-list').innerHTML = ''
@@ -73,7 +78,7 @@ let spreadsheet = null
 						${maxScore > 0 ? `<div class="animal-score" style="color: ${color}">${(a.score * 100).toFixed()}</div>` : ''}
 						<h2>${a.name}</h2>
 						${a.synonyms ? `<h3>${a.synonyms.join(', ')}</h3>` : ''}
-						<h4>${a.characteristics.map(c => selectedChars.has(c) ? `<span class="selected">${c}</span>` : c).join(' · ')}</h4>
+						<h4>${a.characteristics/*.map(c => selectedChars.has(c) ? `<span class="selected">${c}</span>` : c)*/.join(' · ')}</h4>
 						<p>${a.description}</p>
 					</div>
 				`)
@@ -82,20 +87,18 @@ let spreadsheet = null
 	}
 	updateAnimals()
 
-	chars.forEach(c => {
-		const div = document.createElement('div')
-		div.classList.add('char')
-		div.addEventListener('click', () => {
-			if (selectedChars.has(c)) {
-				selectedChars.delete(c)
-			} else {
-				selectedChars.add(c)
-			}
-			updateAnimals()
+	groups
+		.sort((a, b) => b.length - a.length)
+		.forEach(g => {
+			const div = document.createElement('div')
+			div.classList.add('char')
+			div.addEventListener('click', () => {
+				g.forEach(c => selectedChars.add(c))
+				updateAnimals()
+			})
+			div.textContent = g[0]
+			document.querySelector('.available-chars').append(div)
 		})
-		div.textContent = c
-		document.querySelector('.available-chars').append(div)
-	})
 
 	function normalize(str) {
 		return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -165,7 +168,7 @@ let spreadsheet = null
 			localStorage.setItem('totem_api_key', apiKey)
 			localStorage.setItem('totem_client_id', clientId)
 			localStorage.setItem('totem_spreadsheet_id', spreadsheetId)
-			updateProfiles()
+			getProfiles()
 		}, (reason) => {
 			modal.classList.add('visible')
 			const errorSpan = modal.querySelector('.modal-error')
@@ -184,7 +187,7 @@ let spreadsheet = null
 		});
 	}
 
-	function updateProfiles() {
+	function getProfiles() {
 		document.querySelector('.profiles').innerHTML = ''
 		spreadsheet.sheets.forEach((sheet, i) => {
 			const div = document.createElement('div')
@@ -194,7 +197,7 @@ let spreadsheet = null
 			} else {
 				div.addEventListener('click', () => {
 					currentProfile = i
-					updateProfiles()
+					getProfiles()
 				})
 			}
 			document.querySelector('.profiles').append(div)
