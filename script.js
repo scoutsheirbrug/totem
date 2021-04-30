@@ -24,6 +24,16 @@ document.querySelector('.mobile-toggle').addEventListener('click', () => {
 	}
 })
 
+document.querySelector('.profile-copy').addEventListener('click', () => {
+	const data = [...selectedChars].join('\n')
+	const el = document.querySelector('.profiles textarea')
+	el.style.display = 'block'
+	el.value = data
+	el.select()
+	document.execCommand('copy')
+	el.style.display = 'none'
+})
+
 fetch('./data.json').then(r => r.json()).then(data => {
 	animals = data.animals
 	groups = data.groups
